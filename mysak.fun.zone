@@ -1,0 +1,14 @@
+$ORIGIN mysak.fun.
+$TTL 300
+
+; penny - Azure Container App
+penny                   300  IN  CNAME  ca-prd-eus-penny.thankfulisland-4131bb98.eastus.azurecontainerapps.io.
+asuid.penny             300  IN  TXT    "24C4FD8D3A8507E43D386A411379665BC15579939C271A26E15AE5643A8A540A"
+
+; cloudfire - Azure App Service
+cloudfire               300  IN  CNAME  mi-3-cloudfire-y29hf3.azurewebsites.net.
+asuid.cloudfire         300  IN  TXT    "24C4FD8D3A8507E43D386A411379665BC15579939C271A26E15AE5643A8A540A"
+
+; AKS LLM
+llm                     300  IN  A      20.230.229.131
+grafana.llm             300  IN  CNAME  llm.mysak.fun.
