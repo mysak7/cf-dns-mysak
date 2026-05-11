@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mysak.fun DNS Setup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      line-height: 1.65;
+      padding: 2rem 1rem;
+    }
+
+    .page { max-width: 900px; margin: 0 auto; }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid #21262d;
+      padding-bottom: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    header h1 { font-size: 2rem; color: #f0f6fc; font-weight: 700; }
+    header p  { color: #8b949e; margin-top: .4rem; font-size: .95rem; }
+    .badge {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: .15rem .55rem;
+      border-radius: 20px;
+      margin-left: .5rem;
+      vertical-align: middle;
+    }
+    .badge-green  { background: #1a4a2e; color: #3fb950; border: 1px solid #238636; }
+    .badge-blue   { background: #1a3a5c; color: #58a6ff; border: 1px solid #1f6feb; }
+    .badge-orange { background: #4a2d0a; color: #f0883e; border: 1px solid #9e6a03; }
+
+    /* Sections */
+    section { margin-bottom: 2.5rem; }
+    h2 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #f0f6fc;
+      margin-bottom: 1rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid #21262d;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    h2 .icon { font-size: 1rem; }
+    h3 { font-size: 1rem; color: #e6edf3; margin: 1.2rem 0 .5rem; font-weight: 600; }
+
+    p { margin-bottom: .75rem; color: #c9d1d9; }
+
+    /* Architecture diagram */
+    .arch {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1.5rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .82rem;
+      color: #8b949e;
+      overflow-x: auto;
+    }
+    .arch .highlight { color: #58a6ff; }
+    .arch .green     { color: #3fb950; }
+    .arch .orange    { color: #f0883e; }
+    .arch .arrow     { color: #6e7681; }
+
+    /* DNS table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .88rem;
+      margin-top: .5rem;
+    }
+    thead th {
+      background: #161b22;
+      color: #8b949e;
+      font-weight: 600;
+      padding: .6rem .9rem;
+      text-align: left;
+      border-bottom: 1px solid #21262d;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+    tbody tr { border-bottom: 1px solid #161b22; transition: background .1s; }
+    tbody tr:hover { background: #161b22; }
+    tbody td { padding: .6rem .9rem; vertical-align: top; }
+    .mono { font-family: 'Cascadia Code', monospace; font-size: .82rem; color: #79c0ff; }
+    .type-cname { color: #56d364; }
+    .type-a     { color: #f0883e; }
+    .type-txt   { color: #d2a8ff; }
+
+    /* Cards */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+    .card {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1.1rem 1.2rem;
+    }
+    .card-title { font-weight: 600; color: #f0f6fc; margin-bottom: .3rem; font-size: .95rem; }
+    .card-sub   { font-size: .8rem; color: #8b949e; }
+    .card-value { font-family: monospace; font-size: .8rem; color: #79c0ff; margin-top: .4rem; word-break: break-all; }
+    .card-status { margin-top: .6rem; font-size: .78rem; }
+
+    /* Pain points */
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: .8rem; }
+    .pain-list li {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-left: 3px solid #f0883e;
+      border-radius: 0 8px 8px 0;
+      padding: .8rem 1rem;
+      font-size: .9rem;
+    }
+    .pain-list li strong { color: #e6edf3; display: block; margin-bottom: .2rem; }
+    .pain-list li span   { color: #8b949e; font-size: .84rem; }
+    .pain-fix { display: inline-block; margin-top: .3rem; color: #3fb950; font-size: .82rem; }
+
+    /* Code blocks */
+    pre {
+      background: #161b22;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .82rem;
+      overflow-x: auto;
+      color: #c9d1d9;
+      margin-top: .5rem;
+    }
+    pre .kw  { color: #ff7b72; }
+    pre .str { color: #a5d6ff; }
+    pre .com { color: #6e7681; }
+    pre .var { color: #79c0ff; }
+    pre .val { color: #56d364; }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; }
+    .tl-item { display: flex; gap: 1rem; }
+    .tl-line { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot  {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #238636; border: 2px solid #3fb950;
+      flex-shrink: 0; margin-top: .3rem;
+    }
+    .tl-bar  { width: 2px; background: #21262d; flex: 1; margin: 2px 0; }
+    .tl-item:last-child .tl-bar { display: none; }
+    .tl-content { padding-bottom: 1.2rem; }
+    .tl-content strong { color: #e6edf3; font-size: .9rem; }
+    .tl-content p { font-size: .84rem; color: #8b949e; margin: .15rem 0 0; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #21262d;
+      font-size: .8rem;
+      color: #6e7681;
+      text-align: center;
+    }
+    a { color: #58a6ff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <h1>mysak.fun DNS Setup
+      <span class="badge badge-green">Live</span>
+      <span class="badge badge-blue">Cloudflare</span>
+    </h1>
+    <p>DNS management via Terraform · Cloudflare provider · 3 Azure-hosted services</p>
+  </header>
+
+  <!-- Architecture -->
+  <section>
+    <h2><span class="icon">🏗</span> Architecture</h2>
+    <div class="arch">
+<span class="highlight">User</span> <span class="arrow">──▶</span> <span class="highlight">Cloudflare DNS</span> <span class="arrow">(mysak.fun zone)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">├──▶</span> <span class="green">penny.mysak.fun</span>      <span class="arrow">──CNAME──▶</span> Azure Container App  <span class="arrow">(eastus)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">├──▶</span> <span class="green">cloudfire.mysak.fun</span>  <span class="arrow">──CNAME──▶</span> Azure App Service    <span class="arrow">(eastus2)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">├──▶</span> <span class="green">llm.mysak.fun</span>        <span class="arrow">────A─────▶</span> AKS Ingress IP       <span class="orange">20.230.229.131</span>  <span class="arrow">(westus2)</span>
+          <span class="arrow">│</span>
+          <span class="arrow">└──▶</span> <span class="green">grafana.llm.mysak.fun</span> <span class="arrow">──CNAME──▶</span> llm.mysak.fun
+
+<span class="arrow">IaC:</span>  <span class="highlight">Terraform</span> <span class="arrow">+</span> <span class="highlight">cloudflare/cloudflare ~4.0</span>
+<span class="arrow">Repo:</span> <span class="highlight">github.com/mysak7/cf-dns-mysak</span>
+    </div>
+  </section>
+
+  <!-- DNS Records -->
+  <section>
+    <h2><span class="icon">📋</span> DNS Records</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Proxied</th>
+          <th>TTL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">penny.mysak.fun</td>
+          <td><span class="type-cname">CNAME</span></td>
+          <td class="mono" style="font-size:.75rem">ca-prd-eus-penny.thankfulisland-4131bb98.eastus.azurecontainerapps.io</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td class="mono">asuid.penny.mysak.fun</td>
+          <td><span class="type-txt">TXT</span></td>
+          <td class="mono" style="font-size:.75rem; color:#d2a8ff">24C4FD8D…A540A</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td class="mono">cloudfire.mysak.fun</td>
+          <td><span class="type-cname">CNAME</span></td>
+          <td class="mono" style="font-size:.75rem">mi-3-cloudfire-y29hf3.azurewebsites.net</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td class="mono">asuid.cloudfire.mysak.fun</td>
+          <td><span class="type-txt">TXT</span></td>
+          <td class="mono" style="font-size:.75rem; color:#d2a8ff">24C4FD8D…A540A</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td class="mono">llm.mysak.fun</td>
+          <td><span class="type-a">A</span></td>
+          <td class="mono">20.230.229.131</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <td class="mono">grafana.llm.mysak.fun</td>
+          <td><span class="type-cname">CNAME</span></td>
+          <td class="mono">llm.mysak.fun</td>
+          <td><span class="badge badge-orange">DNS only</span></td>
+          <td>300</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.7rem; font-size:.8rem; color:#6e7681">
+      All records are DNS-only (grey cloud). Azure custom domain SSL validation requires the real hostname to be visible — Cloudflare proxy would intercept and break cert issuance.
+    </p>
+  </section>
+
+  <!-- Services -->
+  <section>
+    <h2><span class="icon">☁</span> Services</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">penny</div>
+        <div class="card-sub">Azure Container App · eastus</div>
+        <div class="card-value">rg-prd-eus-penny</div>
+        <div class="card-status">
+          <span class="badge badge-green">Running</span>
+          <span class="badge badge-orange" style="margin-left:.3rem">Scale-to-zero</span>
+        </div>
+        <p style="margin-top:.6rem; font-size:.82rem; color:#8b949e">
+          Scales down to 0 replicas when idle. First request after inactivity has a ~5s cold start delay.
+          SSL cert managed by Azure Container Apps (DigiCert).
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title">cloudfire</div>
+        <div class="card-sub">Azure App Service · eastus2</div>
+        <div class="card-value">mi-3-cloudfire-rg</div>
+        <div class="card-status">
+          <span class="badge badge-green">Running</span>
+          <span class="badge badge-blue" style="margin-left:.3rem">SNI SSL</span>
+        </div>
+        <p style="margin-top:.6rem; font-size:.82rem; color:#8b949e">
+          Free managed cert provisioned and bound after DNS switch.
+          Previously ran with Cloudflare proxy (orange cloud) — cert now served directly by Azure.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title">AKS LLM</div>
+        <div class="card-sub">Azure Kubernetes Service · westus2</div>
+        <div class="card-value">az-llm-aks-rg · pip-dev-wus2-llm</div>
+        <div class="card-status">
+          <span class="badge badge-green">Running</span>
+        </div>
+        <p style="margin-top:.6rem; font-size:.82rem; color:#8b949e">
+          Ingress IP <code style="font-size:.8rem; color:#79c0ff">20.230.229.131</code>.
+          Grafana runs on the same cluster, exposed via a CNAME to <code style="font-size:.8rem; color:#79c0ff">llm.mysak.fun</code>.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Terraform -->
+  <section>
+    <h2><span class="icon">⚙</span> Terraform Setup</h2>
+    <p>Credentials live in <code style="color:#79c0ff">az-networking-lab/.env</code> as <code style="color:#79c0ff">TF_VAR_*</code> exports — source before running.</p>
+    <pre><span class="com"># apply</span>
+<span class="kw">set -a</span> && <span class="kw">source</span> <span class="str">~/GitHub/az-networking-lab/.env</span> && <span class="kw">set +a</span>
+<span class="kw">terraform</span> apply
+
+<span class="com"># import an existing record (zone_id/record_id)</span>
+<span class="kw">terraform</span> import cloudflare_record.&lt;name&gt; <span class="str">"&lt;zone_id&gt;/&lt;record_id&gt;"</span></pre>
+
+    <h3>variables</h3>
+    <pre><span class="var">cloudflare_api_token</span>  <span class="com"># TF_VAR_cloudflare_api_token in .env</span>
+<span class="var">cloudflare_zone_id</span>    <span class="com"># TF_VAR_cloudflare_zone_id in .env  →  b6e79f1c…</span></pre>
+  </section>
+
+  <!-- What was hard -->
+  <section>
+    <h2><span class="icon">🔥</span> What Was Hard</h2>
+    <ul class="pain-list">
+      <li>
+        <strong>Deprecated <code>value</code> field in Cloudflare provider v4</strong>
+        <span>Terraform validated fine but threw deprecation warnings on every field. The provider silently renamed <code>value</code> → <code>content</code> in v4.</span>
+        <span class="pain-fix">✓ Fixed: replaced all <code>value =</code> with <code>content =</code> in main.tf</span>
+      </li>
+      <li>
+        <strong>Variable name mismatch for TF_VAR_ env injection</strong>
+        <span>The .env file exports <code>TF_VAR_cloudflare_zone_id</code> but the Terraform variable was named <code>zone_id</code>, so Terraform ignored the env var and prompted interactively.</span>
+        <span class="pain-fix">✓ Fixed: renamed variable to <code>cloudflare_zone_id</code> to match the env key</span>
+      </li>
+      <li>
+        <strong>cloudfire records already existed in Cloudflare (proxied=true)</strong>
+        <span>Terraform tried to create records that were already there and failed with "already exists". They must have been added manually before — Terraform had no state for them.</span>
+        <span class="pain-fix">✓ Fixed: <code>terraform import cloudflare_record.cloudfire_cname &lt;zone&gt;/&lt;id&gt;</code> to adopt them into state</span>
+      </li>
+      <li>
+        <strong>cloudfire SSL broke after turning off Cloudflare proxy</strong>
+        <span>The record was previously proxied=true — Cloudflare was terminating TLS. Switching to DNS-only exposed that Azure had no managed cert for <code>cloudfire.mysak.fun</code> (SSL state was Disabled).</span>
+        <span class="pain-fix">✓ Fixed: <code>az webapp config ssl create</code> + <code>ssl bind --ssl-type SNI</code> to provision and attach a free managed cert</span>
+      </li>
+      <li>
+        <strong>asuid TXT record — same value for all services</strong>
+        <span>Azure App Service and Container Apps use a per-subscription verification ID (not per-app), so <code>asuid.penny</code> and <code>asuid.cloudfire</code> share the exact same TXT value. Easy to miss if you expect per-app tokens.</span>
+        <span class="pain-fix">✓ Verified: same hash <code>24C4FD8D…A540A</code> works for both</span>
+      </li>
+      <li>
+        <strong>penny cold-start false-alarm</strong>
+        <span>HTTPS to <code>penny.mysak.fun</code> timed out during testing. Looked like a DNS or SSL problem but was actually the Container App scaling from 0 replicas on first request (<code>minReplicas: null</code>).</span>
+        <span class="pain-fix">✓ Expected behaviour — set minReplicas=1 if cold starts are unacceptable</span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Steps taken -->
+  <section>
+    <h2><span class="icon">🗂</span> Steps Taken</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>Discovered services from Azure subscription</strong>
+          <p>Found penny (Container App, eastus), AKS LLM (westus2), cloudfire (App Service, eastus2) and their public endpoints via <code>az resource list</code>.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>Audited existing Azure DNS zone</strong>
+          <p>mysak.fun zone already had records for penny and llm — cloudfire had no DNS record at all.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>Created Terraform repo cf-dns-mysak</strong>
+          <p>Cloudflare provider v4, all 6 records, BIND zone file for manual import fallback.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>Applied Terraform</strong>
+          <p>4 records created cleanly. cloudfire pair failed (already existed) → imported into state.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>Provisioned SSL cert for cloudfire</strong>
+          <p>Created free Azure managed cert, polled until Succeeded, bound with SNI. Verified with openssl.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-line"><div class="tl-dot"></div><div class="tl-bar"></div></div>
+        <div class="tl-content">
+          <strong>All records live and resolving</strong>
+          <p>DNS resolves correctly for all 4 hostnames. SSL valid on penny and cloudfire. LLM and Grafana point to AKS ingress.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    mysak.fun · <a href="https://github.com/mysak7/cf-dns-mysak">github.com/mysak7/cf-dns-mysak</a> · generated 2026-05-11
+  </footer>
+
+</div>
+</body>
+</html>
