@@ -3,7 +3,7 @@ variable "cloudflare_api_token" {
   sensitive = true
 }
 
-variable "zone_id" {
+variable "cloudflare_zone_id" {
   type        = string
   description = "Cloudflare Zone ID for mysak.fun"
 }

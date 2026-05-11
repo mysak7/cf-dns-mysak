@@ -14,7 +14,7 @@ provider "cloudflare" {
 # ── penny (Azure Container App) ──────────────────────────────────────────────
 
 resource "cloudflare_record" "penny_cname" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "penny"
   type    = "CNAME"
   content = "ca-prd-eus-penny.thankfulisland-4131bb98.eastus.azurecontainerapps.io"
@@ -23,7 +23,7 @@ resource "cloudflare_record" "penny_cname" {
 }
 
 resource "cloudflare_record" "penny_asuid" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "asuid.penny"
   type    = "TXT"
   content = "24C4FD8D3A8507E43D386A411379665BC15579939C271A26E15AE5643A8A540A"
@@ -34,7 +34,7 @@ resource "cloudflare_record" "penny_asuid" {
 # ── cloudfire (Azure App Service) ────────────────────────────────────────────
 
 resource "cloudflare_record" "cloudfire_cname" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "cloudfire"
   type    = "CNAME"
   content = "mi-3-cloudfire-y29hf3.azurewebsites.net"
@@ -43,7 +43,7 @@ resource "cloudflare_record" "cloudfire_cname" {
 }
 
 resource "cloudflare_record" "cloudfire_asuid" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "asuid.cloudfire"
   type    = "TXT"
   content = "24C4FD8D3A8507E43D386A411379665BC15579939C271A26E15AE5643A8A540A"
@@ -54,7 +54,7 @@ resource "cloudflare_record" "cloudfire_asuid" {
 # ── AKS LLM ──────────────────────────────────────────────────────────────────
 
 resource "cloudflare_record" "llm_a" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "llm"
   type    = "A"
   content = "20.230.229.131"
@@ -63,7 +63,7 @@ resource "cloudflare_record" "llm_a" {
 }
 
 resource "cloudflare_record" "grafana_llm_cname" {
-  zone_id = var.zone_id
+  zone_id = var.cloudflare_zone_id
   name    = "grafana.llm"
   type    = "CNAME"
   content = "llm.mysak.fun"
